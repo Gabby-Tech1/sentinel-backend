@@ -1,0 +1,11 @@
+INFO:     127.0.0.1:58977 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59000 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59000 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53409 - "GET /scenarios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53410 - "GET /runs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53411 - "GET /findings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53412 - "GET /framework HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53436 - "GET /framework HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53434 - "GET /runs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53433 - "GET /scenarios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53435 - "GET /findings HTTP/1.1" 200 OK

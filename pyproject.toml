@@ -1,0 +1,40 @@
+[project]
+name = "sentinel-backend"
+version = "0.1.0"
+description = "Backend for Sentinel Lab — AI-for-Cybersecurity Strategy Framework thesis"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "sqlmodel>=0.0.22",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "python-multipart>=0.0.12",
+  "httpx>=0.27",
+  "sse-starlette>=2.1",
+  "anthropic>=0.116",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "ruff>=0.7",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N"]
+# E501: line length — Prettier-style long strings are fine.
+# N815: mixedCase field names — required to match the camelCase JSON contract
+#       shared with the Next.js frontend.
+# B008: `Depends()` in argument defaults — canonical FastAPI DI pattern.
+# UP042: str + Enum inheritance — standard Pydantic-compatible pattern.
+ignore = ["E501", "N815", "B008", "UP042"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
