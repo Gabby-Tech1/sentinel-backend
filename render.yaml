@@ -1,0 +1,16 @@
+# Free demo: SQLite data is discarded when the service restarts/redeploys.
+services:
+  - type: web
+    name: sentinel-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    numInstances: 1
+    autoDeployTrigger: "off"
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////app/sentinel.db
+      - key: CORS_ORIGINS
+        value: https://sentinal-lab.vercel.app

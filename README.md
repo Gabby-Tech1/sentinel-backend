@@ -186,6 +186,85 @@ NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 
 Restart the frontend development server after changing these values. Its browser origin must appear in the backend's `CORS_ORIGINS`. Without `NEXT_PUBLIC_USE_REAL_API=true`, the frontend uses its mock data mode.
 
+## Deploy a free demo on Render
+
+This repository includes `Dockerfile` and `render.yaml`. Docker provides Python
+3.12 and runs one Uvicorn worker on Render's `PORT`. The container retains its
+default root user because the simulated lab binds privileged ports on loopback.
+Render exposes only the API HTTP port; the simulated lab stays inside the container.
+
+### Create the service
+
+1. Push the deployment files to the backend GitHub repository. This checkout's
+   `main` branch tracks `Gabby-Tech1/sentinel-backend` (`newrepo`).
+2. In the [Render dashboard](https://dashboard.render.com), choose **New > Blueprint**
+   and connect that backend repository and its `main` branch.
+3. Use `render.yaml` as the Blueprint path. The backend is its own repository,
+   so do not set a `backend` root directory.
+4. The Blueprint sets `CORS_ORIGINS` to `https://sentinal-lab.vercel.app`.
+   If the frontend domain changes, update it to the exact origin without a trailing slash or URL path.
+   For local development too, use
+   `https://sentinal-lab.vercel.app,http://localhost:3000,http://127.0.0.1:3000`.
+5. Confirm the service plan is **Free**, then deploy. No database service or disk
+   is required. The service creates and seeds its SQLite database on startup.
+
+Alternatively, choose **New > Web Service** with these settings:
+
+| Setting | Value |
+| --- | --- |
+| Branch | `main` |
+| Language | Docker |
+| Root directory | Leave empty for the standalone backend repository |
+| Dockerfile path | `./Dockerfile` |
+| Instance type | Free |
+| Health check path | `/health` |
+| Docker command | Leave empty (uses the Dockerfile command) |
+| `DATABASE_URL` | `sqlite:////app/sentinel.db` |
+| `CORS_ORIGINS` | `https://sentinal-lab.vercel.app` |
+
+There are no separate build/start commands to enter for the Docker runtime.
+Automatic deploys are disabled in the Blueprint to avoid interrupting experiments.
+After future pushes, use **Manual Deploy > Deploy latest commit**.
+
+### Connect and verify
+
+Copy the actual `https://...onrender.com` URL from Render. Set these variables in
+the frontend hosting provider and rebuild/redeploy the frontend:
+
+```dotenv
+NEXT_PUBLIC_USE_REAL_API=true
+NEXT_PUBLIC_API_BASE_URL=https://YOUR-SERVICE.onrender.com
+```
+
+Check `/health` returns `status: ok`, `/scenarios` returns six scenarios, and
+`/docs` loads. From the frontend, start a **stub** experiment, watch its live
+events, and confirm the saved result appears. Inspect `/lab/status` after starting
+the experiment to check for failed service bindings in the Linux container.
+Unsupported simulated protocols may be reported as failed; permission errors
+for supported services need investigation before relying on experiment results.
+
+### Free demo limits
+
+Render's free services spin down after 15 minutes without inbound traffic and
+can take about a minute to wake up. SQLite data is ephemeral: runs disappear
+on restarts, redeploys, and idle spin-downs. Keep important research results outside the demo.
+Do not scale beyond one instance or one Uvicorn worker: active runs, lab state,
+and SSE subscriptions are in memory. Interrupted experiments do not resume.
+
+The API currently has no authentication. Anyone who knows the public URL can
+start/cancel experiments and read results; CORS is not access control. Leave
+`ANTHROPIC_API_KEY` unset for this public demo, because enabling it would let
+unauthenticated callers spend your API credits. Add authentication before
+enabling paid model access on a public deployment.
+
+The image excludes local `.env` files, databases, and logs. Existing local data
+is not uploaded. Docker is required locally only if you want to build-test the
+container yourself; Render builds it from GitHub.
+
+Official references: [Docker deployments](https://render.com/docs/docker),
+[free service limits](https://render.com/docs/free), and
+[persistent disks](https://render.com/docs/disks).
+
 ## Local target lab
 
 The lab maps scenario hosts to `127.0.42.x` loopback addresses and opens the declared service ports. It runs inside Python without requiring Docker or virtual machines. The agent's built-in tools make TCP/HTTP requests; the `nmap`- and `nuclei`-style transcript strings are display text, not shell invocations of those programs.
